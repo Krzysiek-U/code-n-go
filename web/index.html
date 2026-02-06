@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>code-n-go // Robotech</title>
+    <script src="static/blockly_compressed.js"></script>
+    <script src="static/blocks_compressed.js"></script>
+    <script src="static/python_compressed.js"></script>
+    <script src="static/pl.js"></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        #header { background: #1a1a1a; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        #blocklyDiv { flex-grow: 1; }
+        .btn-run { background: #e67e22; color: white; border: none; padding: 8px 25px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <strong>code-n-go</strong>
+        <button class="btn-run" onclick="sendCode()">START</button>
+    </div>
+    <div id="blocklyDiv"></div>
 
+    <xml id="toolbox" style="display: none">
+        <category name="Robot" colour="#e67e22">
+            <block type="text_print"></block>
+        </category>
+        <category name="Logika" colour="#5b80a5">
+            <block type="controls_if"></block>
+        </category>
+    </xml>
+
+    <script>
+        var workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            theme: Blockly.Themes.Zelos,
+            renderer: 'zelos'
+        });
+        Blockly.setLocale(Blockly.Msg['pl']);
+
+        function sendCode() {
+            var code = Blockly.Python.workspaceToCode(workspace);
+            fetch('/run', { method: 'POST', body: code })
+            .then(r => r.ok ? console.log("OK") : alert("Błąd!"));
+        }
+    </script>
+</body>
+</html>
