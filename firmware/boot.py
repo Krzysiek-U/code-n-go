@@ -2,7 +2,7 @@ import machine
 import network
 import time
 
-# --- SEKCJA WYŚWIETLACZA (Dla S3 / LCD) ---
+# --- SEKCJA WYŚWIETLACZA (Dla S3 / LCD) ----
 try:
     from gc9a01 import GC9A01
     # Piny dla Waveshare 2.1 (na Lolin32 wywali błąd i przejdzie dalej)
