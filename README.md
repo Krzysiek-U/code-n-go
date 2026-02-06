@@ -1,8 +1,8 @@
-# coden'go 🚀
+# coden'go
 
 **coden'go** to autorski, nowoczesny system operacyjny dla robotów opartych na układach **ESP32-S3**, stworzony z myślą o przełamywaniu barier w edukacji technologicznej.
 
-## 🛠 Filozofia Projektu
+## Filozofia Projektu
 W świecie zdominowanym przez gotowe, zamknięte rozwiązania, **coden'go** przywraca radość z prawdziwej inżynierii. Łączymy "starą dobrą szkołę" (szacunek do mechaniki i optymalizacji) z nowoczesnymi technologiami (MicroPython, Blockly, LVGL).
 
 ### Kluczowe cechy:
