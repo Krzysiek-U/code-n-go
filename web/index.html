@@ -8,26 +8,23 @@
     <script src="static/python_compressed.js"></script>
     <script src="static/pl.js"></script>
     <style>
-        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
-        #header { background: #1a1a1a; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; background: #f0f0f0; }
+        #header { background: #e67e22; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         #blocklyDiv { flex-grow: 1; }
-        .btn-run { background: #e67e22; color: white; border: none; padding: 8px 25px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .btn { background: #2c3e50; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="header">
-        <strong>code-n-go</strong>
-        <button class="btn-run" onclick="sendCode()">START</button>
+        <span><strong>code-n-go</strong> | Robotech</span>
+        <button class="btn" onclick="runCode()">START ▶</button>
     </div>
     <div id="blocklyDiv"></div>
 
     <xml id="toolbox" style="display: none">
-        <category name="Robot" colour="#e67e22">
-            <block type="text_print"></block>
-        </category>
-        <category name="Logika" colour="#5b80a5">
-            <block type="controls_if"></block>
-        </category>
+        <category name="Logika" colour="#5b80a5"><block type="controls_if"></block></category>
+        <category name="Pętle" colour="#5ba55b"><block type="controls_repeat_ext"></block></category>
+        <category name="Robot" colour="#e67e22"><block type="text_print"></block></category>
     </xml>
 
     <script>
@@ -38,10 +35,9 @@
         });
         Blockly.setLocale(Blockly.Msg['pl']);
 
-        function sendCode() {
+        function runCode() {
             var code = Blockly.Python.workspaceToCode(workspace);
-            fetch('/run', { method: 'POST', body: code })
-            .then(r => r.ok ? console.log("OK") : alert("Błąd!"));
+            fetch('/run', { method: 'POST', body: code });
         }
     </script>
 </body>
