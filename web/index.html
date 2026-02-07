@@ -2,43 +2,63 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>code-n-go // Robotech</title>
+    <!-- Biblioteki podstawowe -->
     <script src="static/blockly_compressed.js"></script>
     <script src="static/blocks_compressed.js"></script>
     <script src="static/python_compressed.js"></script>
     <script src="static/pl.js"></script>
-    <style>
-        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; background: #f0f0f0; }
-        #header { background: #e67e22; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        #blocklyDiv { flex-grow: 1; }
-        .btn { background: #2c3e50; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    </style>
+    <!-- Twoje moduły Robotech -->
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/blocks_robotech.js"></script>
+    <script src="static/generator_robotech.js"></script>
 </head>
 <body>
     <div id="header">
-        <span><strong>code-n-go</strong> | Robotech</span>
-        <button class="btn" onclick="runCode()">START ▶</button>
+        <div class="tabs">
+            <div id="tab-blocks" class="tab active" onclick="switchTab('blocks')">KOD</div>
+            <div id="tab-panel" class="tab" onclick="switchTab('panel')">PANEL</div>
+            <div id="tab-pilot" class="tab" onclick="switchTab('pilot')">PILOT</div>
+        </div>
+        <button class="btn-run" onclick="runCode()">START ▶</button>
     </div>
+    
     <div id="blocklyDiv"></div>
 
+    <div id="panelDiv">
+        <h3>MOJE PRZYCISKI</h3>
+        <div id="customButtons"></div>
+    </div>
+
+    <div id="pilotDiv">
+        <h3>PILOT STEROWANIA</h3>
+        <div class="joystick-grid">
+            <div></div><button class="btn-joy" onclick="sendJoy('GÓRA')">▲</button><div></div>
+            <button class="btn-joy" onclick="sendJoy('LEWO')">◀</button><div></div><button class="btn-joy" onclick="sendJoy('PRAWO')">▶</button>
+            <div></div><button class="btn-joy" onclick="sendJoy('DÓŁ')">▼</button><div></div>
+        </div>
+        <div class="action-grid">
+            <button class="btn-action" onclick="sendJoy('1')">1</button>
+            <button class="btn-action" onclick="sendJoy('2')">2</button>
+            <button class="btn-action" style="background:#27ae60;" onclick="sendJoy('3')">3</button>
+            <button class="btn-action" style="background:#27ae60;" onclick="sendJoy('4')">4</button>
+        </div>
+    </div>
+
     <xml id="toolbox" style="display: none">
+        <category name="Robot" colour="#e67e22">
+            <block type="pilot_add_button"></block>
+            <block type="pilot_on_joy"></block>
+            <block type="led_on"></block>
+            <block type="led_off"></block>
+            <block type="wait_ms"></block>
+        </category>
         <category name="Logika" colour="#5b80a5"><block type="controls_if"></block></category>
         <category name="Pętle" colour="#5ba55b"><block type="controls_repeat_ext"></block></category>
-        <category name="Robot" colour="#e67e22"><block type="text_print"></block></category>
     </xml>
 
-    <script>
-        var workspace = Blockly.inject('blocklyDiv', {
-            toolbox: document.getElementById('toolbox'),
-            theme: Blockly.Themes.Zelos,
-            renderer: 'zelos'
-        });
-        Blockly.setLocale(Blockly.Msg['pl']);
-
-        function runCode() {
-            var code = Blockly.Python.workspaceToCode(workspace);
-            fetch('/run', { method: 'POST', body: code });
-        }
-    </script>
+    <!-- Główna logika aplikacji -->
+    <script src="static/app.js"></script>
 </body>
 </html>
