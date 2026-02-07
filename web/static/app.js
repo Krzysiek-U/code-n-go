@@ -230,50 +230,44 @@ function trySetLocale() {
 trySetLocale();
 
 async function saveProject() {
-    // 1. SPRAWDZENIE FIZYCZNE: Czy kontener Pythona jest widoczny?
-    const pythonDiv = document.getElementById('pythonDiv');
-    const isPythonVisible = pythonDiv && pythonDiv.style.display !== 'none';
-    
-    let baseName = prompt("Podaj nazwę pliku (rozszerzenie zostanie dodane automatycznie):", "moj_projekt");
-    if (!baseName) return;
+    const activeTab = document.querySelector('.tab.active').id;
+    let name, data, extension;
 
-    // 2. CZYSZCZENIE NAZWY: Usuwamy wszystko po kropce, by uniknąć .py.xml
-    let cleanName = baseName.split('.')[0]; 
-    
-    let data, fileName;
-
-    if (isPythonVisible) {
-        // WYMUSZONY ZAPIS PYTHON
-        fileName = cleanName + ".py";
-        // Upewnij się, że ID Twojego pola tekstowego to 'pythonEditor'
+    if (activeTab === 'tab-python') {
+        name = prompt("Podaj nazwę skryptu Python (bez .py):", "moj_skrypt");
+        if (!name) return;
         data = document.getElementById('pythonEditor').value;
+        extension = ".py";
     } else {
-        // WYMUSZONY ZAPIS BLOCKLY
-        fileName = cleanName + ".xml";
+        name = prompt("Podaj nazwę projektu klocków:", "moj_projekt");
+        if (!name) return;
         const xml = Blockly.Xml.workspaceToDom(workspace);
         data = Blockly.Xml.domToText(xml);
+        extension = ".xml";
     }
 
-    // LOG DO KONSOLI (F12) - sprawdź co tu wypisuje!
-    console.log("Tryb Python: " + isPythonVisible + " | Zapisuję jako: " + fileName);
+    // Czyścimy nazwę z ewentualnych kropek wpisanych przez użytkownika
+    let cleanName = name.split('.')[0];
+    const fileName = cleanName + extension;
 
     try {
         const response = await fetch('/save_project', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: fileName, data: data })
+            body: JSON.stringify({ name: fileName, data: data }) // USUNIĘTO + ".xml"
         });
         
         if (response.ok) {
-            logStatus("ZAPISANO: " + fileName);
-            if (isPythonVisible) pythonEdited = false;
+            logStatus("Zapisano plik: " + fileName);
+            if (activeTab === 'tab-python') pythonEdited = false;
         } else {
-            logStatus("BŁĄD SERWERA!", true);
+            logStatus("Błąd serwera przy zapisie!", true);
         }
-    } catch (e) {
-        logStatus("BŁĄD POŁĄCZENIA!", true);
+    } catch (e) { 
+        logStatus("Błąd połączenia!", true); 
     }
 }
+
 
 
 

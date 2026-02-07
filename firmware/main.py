@@ -1,9 +1,12 @@
-import asyncio
+import gc
 import os
-from microdot import Microdot, send_file
+import time
+import json
+from microdot import Microdot, send_file, Response
 
 app = Microdot()
 
+# Funkcja pomocnicza
 def file_exists(path):
     try:
         os.stat(path)
@@ -11,35 +14,86 @@ def file_exists(path):
     except OSError:
         return False
 
-# Obsługa bibliotek Blockly z Gzip
+# Tworzenie folderu na projekty przy starcie
+if not file_exists('/projects'):
+    try:
+        os.mkdir('/projects')
+    except:
+        pass
+
 @app.route('/static/<path:path>')
-async def static(request, path):
-    file_path = '/web/static/' + path
-    gz_path = file_path + '.gz'
+def static(request, path):
+    gc.collect()
+    gz_path = '/web/static/' + path + '.gz'
     
-    if file_exists(gz_path):
-        # Wysyłamy spakowany plik i mówimy przeglądarce, żeby go rozpakowała
-        return send_file(gz_path, content_type='application/javascript', content_encoding='gzip')
-    return send_file(file_path)
+    content_type = 'application/javascript'
+    if path.endswith('.css'):
+        content_type = 'text/css'
+    elif path.endswith('.map'):
+        return "Not found", 404
+
+    if not file_exists(gz_path):
+        return "404", 404
+
+    def stream_gz():
+        with open(gz_path, 'rb') as f:
+            while True:
+                chunk = f.read(1024)
+                if not chunk: break
+                yield chunk
+
+    return Response(body=stream_gz(), headers={
+        'Content-Type': content_type,
+        'Content-Encoding': 'gzip'
+    })
 
 @app.route('/')
-async def index(request):
+def index(request):
     return send_file('/web/index.html')
 
-@app.route('/run', methods=['POST'])
-async def run(request):
-    code = request.body.decode('utf-8')
-    print("--- WYKONUJĘ KOD Z BLOCKLY ---")
-    print(code)
-    try:
-        exec(code)
-        return 'OK'
-    except Exception as e:
-        return str(e), 500
+# --- NOWE ENDPOINTY DLA BLOCKLY ---
 
-async def start():
-    print("Serwer code-n-go gotowy na porcie 80")
-    await app.start_server(port=80)
+@app.route('/save_project', methods=['POST'])
+def save_p(request):
+    data = request.json
+    # Bierzemy nazwę prosto z JS (tam już jest .py lub .xml)
+    name = data['name'].replace(" ", "_") 
+    
+    # KLUCZOWA ZMIANA: Usuwamy ".xml" z tej linii!
+    filename = f"/projects/{name}" 
+    
+    with open(filename, 'w') as f:
+        f.write(data['data'])
+    return {'status': 'ok'}
+
+
+@app.route('/list_projects')
+def list_p(request):
+    files = os.listdir('/projects')
+    return json.dumps(files)
+
+@app.route('/load_project')
+def load_p(request, name=None):
+    name = request.args.get('name')
+    path = f"/projects/{name}"
+    if file_exists(path):
+        with open(path, 'r') as f:
+            return f.read(), 200, {'Content-Type': 'text/xml'}
+    return 'Not found', 404
+
+# ---------------------------------
+
+@app.route('/run', methods=['POST'])
+def run(request):
+    code = request.body.decode('utf-8')
+    print("\n--- WYKONUJE KOD Z BLOCKLY ---\n", code)
+    # Tu w przyszłości dodasz wysyłanie do ATtiny84
+    try:
+        exec(code, globals())
+    except Exception as e:
+        print("Błąd wykonania:", e)
+    return 'OK'
 
 if __name__ == '__main__':
-    asyncio.run(start())
+    print("--- code-n-go OS na S3 (GZIP + File System) GOTOWY ---")
+    app.run(host='0.0.0.0', port=80, debug=True)
