@@ -1,14 +1,195 @@
-body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; background: #f0f0f0; overflow: hidden; }
-#header { background: #e67e22; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+body { 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    font-family: sans-serif; 
+    background: #f0f0f0; 
+    overflow: hidden; 
+}
+
+#header { 
+    background: #e67e22; 
+    color: white; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+    z-index: 100; /* Zwiększony priorytet */
+    height: 50px; /* Stała wysokość zapobiega "skakaniu" paska */
+}
+
 .tabs { display: flex; height: 100%; }
-.tab { padding: 15px 15px; cursor: pointer; font-weight: bold; background: rgba(0,0,0,0.1); border-bottom: 3px solid transparent; transition: 0.3s; font-size: 13px; }
-.tab.active { background: white; color: #e67e22; border-bottom: 3px solid #d35400; }
-#blocklyDiv { flex-grow: 1; display: block; }
-#panelDiv, #pilotDiv { flex-grow: 1; display: none; padding: 20px; overflow-y: auto; background: #ecf0f1; text-align: center; }
+
+.tab { 
+    padding: 0 20px; 
+    display: flex;
+    align-items: center;
+    cursor: pointer; 
+    font-weight: bold; 
+    background: rgba(0,0,0,0.1); 
+    border-bottom: 3px solid transparent; 
+    transition: 0.3s; 
+    font-size: 13px; 
+    height: 100%;
+}
+
+.tab.active { 
+    background: white; 
+    color: #e67e22; 
+    border-bottom: 3px solid #d35400; 
+}
+
+/* FIX DLA MENU PLIK */
+.dropdown {
+    position: relative; /* Rodzic dla pozycjonowania absolutnego */
+    display: inline-block;
+    height: 100%;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; /* Dokładnie pod headerem */
+    left: 0;
+    background-color: #333;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+    z-index: 9999; /* Musi być najwyżej, by lewitować nad Blockly/Panelami */
+    border-radius: 0 0 8px 8px;
+    padding: 5px 0;
+}
+
+/* Pokazywanie menu */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dropdown-content a:hover {
+    background-color: #444;
+}
+
+.dropdown-content hr {
+    border: 0;
+    border-top: 1px solid #555;
+    margin: 5px 0;
+}
+
+/* Przyciski w headerze */
+.btn-run { 
+    background: #2c3e50; 
+    color: white; 
+    border: none; 
+    padding: 8px 15px; 
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    margin: 0 10px;
+    height: fit-content;
+}
+
+/* Podgląd pod okrągły LCD GC9A01 */
+#blocklyDiv { flex-grow: 1; display: block; position: relative; }
+
+#panelDiv, #pilotDiv { 
+    flex-grow: 1; 
+    display: none; 
+    padding: 20px; 
+    overflow-y: auto; 
+    background: #ecf0f1; 
+    text-align: center; 
+}
+/* Styl dla przycisku menu udającego zakładkę */
+.menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    height: 100%;
+    color: white;
+    cursor: pointer;
+    background: rgba(0,0,0,0.1);
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+/* Efekt po najechaniu na obszar dropdown */
+.dropdown:hover .menu-trigger {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Reszta Twojego stylu dla dropdown zostaje bez zmian */
+.dropdown {
+    position: relative;
+    display: flex; /* Zapewnia pełną wysokość w headerze */
+    height: 100%;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    background-color: #333;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+    z-index: 9999;
+    border-radius: 0 0 8px 8px;
+    padding: 5px 0;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Linki w menu - usuwamy style klasy menu-item jeśli tam były */
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+}
+
+.dropdown-content a:hover {
+    background-color: #444;
+}
+
+#statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    background: #2c3e50;
+    color: #bdc3c7;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    box-sizing: border-box;
+    z-index: 10002;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+
+
+/* Joystick i sterowanie */
 .btn-control { width: 130px; height: 70px; background: #e67e22; color: white; border: none; border-radius: 12px; font-weight: bold; margin: 10px; cursor: pointer; box-shadow: 0 4px #d35400; }
 .joystick-grid { display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); gap: 10px; justify-content: center; margin: 20px auto; }
 .action-grid { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
 .btn-joy { width: 80px; height: 80px; background: #2c3e50; color: white; border: none; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px #1a252f; }
 .btn-action { width: 60px; height: 60px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #c0392b; }
-.btn-joy:active, .btn-action:active, .btn-control:active { transform: translateY(4px); box-shadow: none; }
-.btn-run { background: #2c3e50; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+.btn-joy:active, .btn-action:active, .btn-control:active { transform: translateY(2px); box-shadow: none; }

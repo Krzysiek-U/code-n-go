@@ -2,29 +2,54 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>code-n-go // Robotech</title>
-    <!-- Biblioteki podstawowe -->
+    <!-- 1. style -->
+    <link rel="stylesheet" href="static/style.css">
+    
+    <!-- 2. silnik Blockly (najcięższe) -->
     <script src="static/blockly_compressed.js"></script>
     <script src="static/blocks_compressed.js"></script>
     <script src="static/python_compressed.js"></script>
     <script src="static/pl.js"></script>
-    <!-- Twoje moduły Robotech -->
-    <link rel="stylesheet" href="static/style.css">
+    
+    <!-- 3. definicje klocków -->
     <script src="static/blocks_robotech.js"></script>
     <script src="static/generator_robotech.js"></script>
+    <!-- app.js musi być na samym dole w <body>, tuż przed </body> -->
 </head>
 <body>
     <div id="header">
         <div class="tabs">
-            <div id="tab-blocks" class="tab active" onclick="switchTab('blocks')">KOD</div>
-            <div id="tab-panel" class="tab" onclick="switchTab('panel')">PANEL</div>
-            <div id="tab-pilot" class="tab" onclick="switchTab('pilot')">PILOT</div>
+            <div id="tab-blocks" class="tab active" onclick="switchTab('blocks')">Blockly</div>
+            <div id="tab-python" class="tab" onclick="switchTab('python')">Python</div>
+            <div id="tab-panel" class="tab" onclick="switchTab('panel')">Panel</div>
+            <div id="tab-pilot" class="tab" onclick="switchTab('pilot')">Pad</div>
+        </div>
+        <div class="dropdown">
+            <div class="tab menu-trigger">Plik ▼</div>
+            <div class="dropdown-content">
+                <a href="#" class="menu-item" onclick="newProject()">Nowy</a>
+                <a href="#" class="menu-item" onclick="saveProject()">Zapisz</a>
+                <a href="#" class="menu-item" onclick="loadProject()">Otwórz</a>
+                <hr>
+                <a href="#" class="menu-item" onclick="loadExample()">Przykłady...</a>
+            </div>
         </div>
         <button class="btn-run" onclick="runCode()">START ▶</button>
     </div>
+
     
     <div id="blocklyDiv"></div>
+
+    <div id="pythonDiv" style="display:none; flex-grow:1; background:#1e1e1e; width:100%; height:100%;">
+        <div id="pythonContainer" style="display:flex; width:100%; height:100%; font-family:monospace;">
+            <!-- Numery linii: wąskie -->
+            <div id="lineNumbers" style="padding:10px 5px; background:#252526; color:#858585; text-align:right; min-width:35px; border-right:1px solid #333; font-size:14px; line-height:1.5;">1</div>
+            <!-- Edytor: zajmuje całą resztę (flex-grow: 1) -->
+            <textarea id="pythonEditor" spellcheck="false" style="flex-grow:1; width:100%; background:transparent; color:#d4d4d4; border:none; padding:10px; resize:none; outline:none; font-size:14px; line-height:1.5; white-space:pre;"></textarea>
+        </div>
+    </div>
+
 
     <div id="panelDiv">
         <h3>MOJE PRZYCISKI</h3>
@@ -45,6 +70,18 @@
             <button class="btn-action" style="background:#27ae60;" onclick="sendJoy('4')">4</button>
         </div>
     </div>
+    
+    <!-- Modal do wyboru plików -->
+    <div id="fileModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div style="background:#2c3e50; padding:20px; border-radius:15px; width:80%; max-width:300px; color:white; text-align:center;">
+            <h3>Otwórz projekt</h3>
+            <div id="fileList" style="max-height:200px; overflow-y:auto; margin:15px 0; border:1px solid #555; border-radius:5px;">
+                <!-- Tu wskoczą pliki -->
+            </div>
+            <button onclick="document.getElementById('fileModal').style.display='none'" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Anuluj</button>
+        </div>
+    </div>
+
 
     <xml id="toolbox" style="display: none">
         <category name="Robot" colour="#e67e22">
@@ -57,6 +94,11 @@
         <category name="Logika" colour="#5b80a5"><block type="controls_if"></block></category>
         <category name="Pętle" colour="#5ba55b"><block type="controls_repeat_ext"></block></category>
     </xml>
+    
+    <div id="statusbar">
+        <span id="status-msg">Inicjalizacja systemu...</span>
+        <span id="status-info">Code-n-Go OS | S3-Waveshare</span>
+    </div>
 
     <!-- Główna logika aplikacji -->
     <script src="static/app.js"></script>
