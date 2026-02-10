@@ -3,21 +3,117 @@
 <head>
     <meta charset="utf-8">
     <title>code-n-go // Robotech</title>
-    <!-- 1. style -->
     <link rel="stylesheet" href="static/style.css">
     
-    <!-- 2. silnik Blockly (najcięższe) -->
     <script src="static/blockly_compressed.js"></script>
     <script src="static/blocks_compressed.js"></script>
     <script src="static/python_compressed.js"></script>
     <script src="static/pl.js"></script>
     
-    <!-- 3. definicje klocków -->
-    <script src="static/blocks_robotech.js"></script>
-    <script src="static/generator_robotech.js"></script>
+    <script src="/static/blockly_blocks.js"></script>
+    <script src="/static/blockly_python.js"></script>
     <!-- app.js musi być na samym dole w <body>, tuż przed </body> -->
+    <style>
+            #loader {
+                position: fixed;
+                top: 0; left: 0;
+                width: 100vw; height: 100vh;
+                background: #2c3e50; /* Ciemne tło pasuje do S3 */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 99999; /* Musi być wyżej niż menu i Blockly */
+                transition: opacity 0.5s ease-out;
+            }
+
+            #loader-msg {
+                color: #bdc3c7;
+                margin-top: 20px;
+                font-family: sans-serif;
+                letter-spacing: 1px;
+            }
+            /* Kontener Loadera */
+            #loader {
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: #2c3e50; /* Ciemny granat Robotech */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 99999;
+                transition: opacity 0.5s ease;
+            }
+
+            /* Tekst pod puzzlami */
+            .loader-text {
+                color: white;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin-top: 20px;
+                letter-spacing: 4px;
+                font-size: 1.2rem;
+            }
+
+            /* KLUCZ: Animacja SVG */
+            .puzzle-svg {
+                overflow: visible;
+            }
+
+            .piece {
+                opacity: 0;
+                /* transition definuje powrót, transform-origin środek dla obrotu */
+                transform-origin: center;
+            }
+
+            /* Definicja lotu dla każdego kawałka */
+            @keyframes assemble {
+                0% {
+                    opacity: 0;
+                    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+                }
+                100% {
+                    opacity: 1;
+                    transform: translate(0, 0) rotate(0deg);
+                }
+            }
+
+            /* Każdy kawałek ma inne parametry startowe */
+            .p1 { --dx: -150px; --dy: -150px; --dr: -45deg;  animation: assemble 0.8s 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+            .p2 { --dx: 150px;  --dy: -150px; --dr: 45deg;   animation: assemble 0.8s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+            .p3 { --dx: -150px; --dy: 150px;  --dr: -90deg;  animation: assemble 0.8s 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+            .p4 { --dx: 150px;  --dy: 150px;  --dr: 90deg;   animation: assemble 0.8s 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+            /* Efekt pulsowania całego logo po złożeniu */
+            .puzzle-svg {
+                animation: pulse 2s 1.5s infinite ease-in-out;
+            }
+
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+
+    </style>
+
 </head>
 <body>
+    <!-- LOADER -->
+    <div id="loader">
+        <svg width="120" height="120" viewBox="0 0 110 130" class="puzzle-svg">
+            <rect class="piece p1" x="5" y="5" width="45" height="45" rx="8" fill="#e67e22" />
+            <rect class="piece p2" x="55" y="5" width="45" height="45" rx="8" fill="#d35400" />
+            <rect class="piece p3" x="5" y="55" width="45" height="45" rx="8" fill="#d35400" />
+            <rect class="piece p4" x="55" y="55" width="45" height="45" rx="8" fill="#e67e22" />
+            <text x="55" y="125" text-anchor="middle" fill="white" style="font: bold 14px sans-serif; letter-spacing: 2px;">ROBOTECH</text>
+        </svg>
+        <p id="loader-msg">Inicjalizacja ESP32-S3...</p>
+    </div>
+
+    <!-- RESZTA  -->
+
     <div id="header">
         <div class="tabs">
             <div id="tab-blocks" class="tab active" onclick="switchTab('blocks')">Blockly</div>
@@ -30,9 +126,9 @@
             <div class="dropdown-content">
                 <a href="#" class="menu-item" onclick="newProject()">Nowy</a>
                 <a href="#" class="menu-item" onclick="saveProject()">Zapisz</a>
-                <a href="#" class="menu-item" onclick="loadProject()">Otwórz</a>
+                <a href="#" class="menu-item" onclick="listProjects()">Otwórz</a>
                 <hr>
-                <a href="#" class="menu-item" onclick="loadExample()">Przykłady...</a>
+                <a href="#" class="menu-item" onclick="loadExample()">Przykłady...</a>																									
             </div>
         </div>
         <button class="btn-run" onclick="runCode()">START ▶</button>
@@ -57,17 +153,21 @@
     </div>
 
     <div id="pilotDiv">
-        <h3>PILOT STEROWANIA</h3>
-        <div class="joystick-grid">
-            <div></div><button class="btn-joy" onclick="sendJoy('GÓRA')">▲</button><div></div>
-            <button class="btn-joy" onclick="sendJoy('LEWO')">◀</button><div></div><button class="btn-joy" onclick="sendJoy('PRAWO')">▶</button>
-            <div></div><button class="btn-joy" onclick="sendJoy('DÓŁ')">▼</button><div></div>
-        </div>
-        <div class="action-grid">
+        <div class="pad-grid">
+            <!-- Rząd 1 (Góra): 7(1), 8(Góra), 9(3) -->
             <button class="btn-action" onclick="sendJoy('1')">1</button>
+            <button class="btn-joy" onclick="sendJoy('GÓRA')">▲</button>
+            <button class="btn-action" onclick="sendJoy('3')">3</button>
+
+            <!-- Rząd 2 (Środek): 4(Lewo), 5(STOP), 6(Prawo) -->
+            <button class="btn-joy" onclick="sendJoy('LEWO')">◀</button>
+            <button class="btn-stop" onclick="sendJoy('STOP')">■</button>
+            <button class="btn-joy" onclick="sendJoy('PRAWO')">▶</button>
+
+            <!-- Rząd 3 (Dół): 1(2), 2(Dół), 3(4) -->
             <button class="btn-action" onclick="sendJoy('2')">2</button>
-            <button class="btn-action" style="background:#27ae60;" onclick="sendJoy('3')">3</button>
-            <button class="btn-action" style="background:#27ae60;" onclick="sendJoy('4')">4</button>
+            <button class="btn-joy" onclick="sendJoy('DÓŁ')">▼</button>
+            <button class="btn-action" onclick="sendJoy('4')">4</button>
         </div>
     </div>
     
@@ -82,7 +182,6 @@
         </div>
     </div>
 
-
     <xml id="toolbox" style="display: none">
         <category name="Robot" colour="#e67e22">
             <block type="pilot_add_button"></block>
@@ -90,11 +189,44 @@
             <block type="led_on"></block>
             <block type="led_off"></block>
             <block type="wait_ms"></block>
+            <block type="servo_move">
+                <field name="PIN">27</field>
+                <field name="ANGLE">90</field>
+            </block>
         </category>
-        <category name="Logika" colour="#5b80a5"><block type="controls_if"></block></category>
-        <category name="Pętle" colour="#5ba55b"><block type="controls_repeat_ext"></block></category>
+        
+        <category name="Ekran" colour="#3498db">
+            <block type="screen_print">
+                <field name="MSG">Hej Robo!</field>
+                <field name="LINE">0</field>
+                <field name="COL">0x07E0</field>
+            </block>
+            <block type="screen_rect">
+                <field name="X">10</field>
+                <field name="Y">10</field>
+                <field name="W">100</field>
+                <field name="H">50</field>
+                <field name="COL">0xF800</field>
+            </block>
+            <block type="screen_clear"></block>
+        </category>
+        
+        <category name="Logika" colour="#5b80a5">
+            <block type="controls_if"></block>
+        </category>
+        
+        <category name="Pętle" colour="#5ba55b">
+            <block type="controls_repeat_ext">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
     </xml>
-    
+
+        
     <div id="statusbar">
         <span id="status-msg">Inicjalizacja systemu...</span>
         <span id="status-info">Code-n-Go OS | S3-Waveshare</span>
