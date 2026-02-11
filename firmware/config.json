@@ -1,18 +1,55 @@
 {
   "profiles": {
+    "S3_WAVESHARE_185": {
+      "name": "Waveshare 1.85 ESP32-S3",
+      "display": "ST77916",
+      "bus": "QSPI",
+      "width": 280,
+      "height": 456,
+      "pins": {
+        "sck": 46,
+        "cs": 1,
+        "d0": 44,
+        "d1": 43,
+        "d2": 0,
+        "d3": 2,
+        "rst": 17,
+        "bl": 16
+      },
+      "touch": {
+        "driver": "CST816D",
+        "sda": 15,
+        "scl": 14,
+        "int": 21,
+        "rst": 13
+      }
+    },
     "S3_ROUND": {
       "name": "Robotech S3 Round",
       "display": "GC9A01",
       "width": 360,
       "height": 360,
-      "pins": {"sck": 10, "mosi": 11, "cs": 9, "dc": 8, "rst": 12, "bl": 40}
+      "pins": {
+        "sck": 10, 
+        "mosi": 11, 
+        "cs": 9, 
+        "dc": 8, 
+        "rst": 12, 
+        "bl": 40
+      }
     },
     "LOLIN32_LITE": {
       "name": "Robotech Standard",
       "display": "ST7789",
       "width": 240,
       "height": 240,
-      "pins": {"sck": 18, "mosi": 23, "cs": 5, "dc": 16, "rst": 17}
+      "pins": {
+        "sck": 18, 
+        "mosi": 23, 
+        "cs": 5, 
+        "dc": 16, 
+        "rst": 17
+      }
     }
   }
 }
