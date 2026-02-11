@@ -24,3 +24,7 @@ scr = lv.screen_active()
 lbl = lv.label(scr)
 lbl.set_text("Code-n-go: SYSTEM OK")
 lbl.align(lv.ALIGN.CENTER, 0, 0)
+
+while True:
+    lv.task_handler()
+    time.sleep_ms(5)
