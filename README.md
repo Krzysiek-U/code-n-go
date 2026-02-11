@@ -20,5 +20,17 @@ Projekt wykorzystuje architekturę **Full-stack Embedded**:
 ## Misja Robotech
 Uczymy dzieciaki, że technologia to nie tylko konsumpcja, ale przede wszystkim tworzenie. **coden'go** to narzędzie dla przyszłych inżynierów, którzy nie boją się "pobrudzić rąk" kodem i elektroniką.
 
+### Waveshare 1.85" ESP32-S3 (ST77916 QSPI)
+| Funkcja | Pin GPIO |
+| :--- | :--- |
+| **LCD_SCK** | 46 |
+| **LCD_CS** | 1 |
+| **LCD_D0 / D1 / D2 / D3** | 44 / 43 / 0 / 2 |
+| **LCD_BL (Backlight)** | 16 |
+| **LCD_RST (Reset)** | 17 |
+| **TOUCH_SDA / SCL** | 15 / 14 |
+| **TOUCH_INT / RST** | 21 / 13 |
+
+
 ---
 *Created with Passion by [Robotech](https://robotech.edu.pl)*
